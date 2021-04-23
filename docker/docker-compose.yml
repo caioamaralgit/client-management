@@ -7,7 +7,7 @@ services:
     container_name: company_customers_api
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - ${SERVER_PORT:-8000}:8000
     networks:
       - api
       - db
@@ -19,16 +19,36 @@ services:
       - db
 
   db:
-    image: mongo:4.4
+    build: 
+      context: ../
+      dockerfile: docker/mongo/Dockerfile
     container_name: company_customers_db
     restart: unless-stopped
     networks:
       - db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USER:-customers}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWD:-bluecore}
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME:-customers}
     volumes:
       - company_customers_db:/data/db
+
+  web:
+    image: node:14
+    command: yarn start
+    working_dir: /app
+    container_name: company_customers_web
+    restart: unless-stopped
+    ports:
+      - 80:3000
+    networks:
+      - api
+    links:
+      - api
+    volumes:
+      - ../web/:/app
+    depends_on:
+      - api
 
 networks:
   api:
