@@ -4,16 +4,28 @@ This is an application to demontrate the use of an NodeJS API with a React appli
 
 ### Running project
 
-First copy the `api/.env.example` file to `api/.env`:
+First copy the `api/src/.env.example` file to `api/src/.env`:
 
 ```shell
-cp api/.env.example api/.env
+cp api/src/.env.example api/src/.env
 ``` 
 
-After that start the Docker Compose from the project root:
+After that, download the NPM packages and start the Docker Compose from the project root:
 
 ```shell
-docker-compose -f docker/docker-compose.yml --env-file api/.env up
+export DOWNLOAD_NPM="cd api && yarn && cd ../web && yarn"
+
+# If you have Yarn installed
+sh -c $DOWNLOAD_NPM
+
+# Alternatively you can use Docker
+docker run -it -v $(pwd):/app -w /app --rm node sh -c $DOWNLOAD_NPM
+
+# If --env-file is available:
+docker-compose -f docker/docker-compose.yml --env-file api/src/.env up
+
+# Otherwise
+docker-compose -f docker/docker-compose.yml up
 ``` 
 
 _\* Make sure that the ports 80 and 8000 are free. They will be used for the web client and the API._
